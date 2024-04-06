@@ -1,5 +1,5 @@
 const express=require("express")
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app=express()
 const port=process.env.port || 5000
 require("dotenv").config()
@@ -40,7 +40,7 @@ async function run() {
       const result=await blogCollection.insertOne(data)
       res.send(result)
       
-    })
+    }) 
 
 
     // post project data into mongo db.
@@ -52,8 +52,21 @@ async function run() {
       res.send(result)
     })
 
+    app.get("/get_projects", async(req,res)=>{
+      const result=await projectCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.get("/get_project" , async(req,res)=>{
+      const data= new ObjectId(req.query.id)
+      const query={_id:data}
+      
+      const result=await projectCollection.findOne(query)
+      res.send(result)
+    })
 
 
+   
 
 
     // Connect the client to the server	(optional starting in v4.7)
