@@ -1,12 +1,15 @@
 const express=require("express")
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app=express()
 const port=process.env.port || 5000
 require("dotenv").config()
+const cors=require("cors")
+const cookieParser=require("cookie-parser")
 
  
-
-
+app.use(cors())
+app.use(express.json())
+app.use(cookieParser())
 
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASSWORD}@cluster0.qe6izo7.mongodb.net/?retryWrites=true&w=majority`;
@@ -26,9 +29,44 @@ async function run() {
     app.get("/",async(req,res)=>{
         res.send(`this server is running on ${port} port.`)
     })
+    
+    // post blog data into mongo db.
+    const database=client.db("Saiful's_protfolio")
+
+    const blogCollection=database.collection("Blogs")
+    app.post("/post_blog", async(req,res)=>{
+      const data=req.body
+      
+      const result=await blogCollection.insertOne(data)
+      res.send(result)
+      
+    }) 
 
 
+    // post project data into mongo db.
 
+    const projectCollection=database.collection("Projects")
+    app.post("/post_projects",async(req,res)=>{
+      const data=req.body
+      const result=await projectCollection.insertOne(data)
+      res.send(result)
+    })
+
+    app.get("/get_projects", async(req,res)=>{
+      const result=await projectCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.get("/get_project" , async(req,res)=>{
+      const data= new ObjectId(req.query.id)
+      const query={_id:data}
+      
+      const result=await projectCollection.findOne(query)
+      res.send(result)
+    })
+
+
+   
 
 
     // Connect the client to the server	(optional starting in v4.7)
